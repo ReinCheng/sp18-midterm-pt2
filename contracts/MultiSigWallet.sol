@@ -49,11 +49,13 @@ contract MultiSigWallet {
     /// @dev add new owner to have access, enables the ability to create more than one owner to manage the wallet
     function addOwner(address newOwner) isOwner public {
       //YOUR CODE HERE
+      _owners[newOwner] = 1;
     }
 
     /// @dev remove suspicious owners
     function removeOwner(address existingOwner) isOwner public {
       //YOUR CODE HERE
+      _owners[existingOwner] = 0;
     }
 
     /// @dev Fallback function, which accepts ether when sent to contract
@@ -64,6 +66,7 @@ contract MultiSigWallet {
     function withdraw(uint amount) public {
       require(address(this).balance >= value);
       //YOUR CODE HERE
+      msg.sender.transfer(amount); //not quite sure what to do here
 
     }
 
@@ -78,25 +81,28 @@ contract MultiSigWallet {
     function transferTo(address destination, uint value) validOwner public {
       require(address(this).balance >= value);
       //YOUR CODE HERE
+      _transactionIndex++;
 
       //create the transaction
       //YOUR CODE HERE
-
-
-
+      _transactions[_transactionIndex] = Transaction(msg.sender, destination, value, 0);
+      _pendingTransactions.push(_transactionIndex);
 
 
       //add transaction to the data structures
       //YOUR CODE HERE
+      _pendingTransactions.push(_transactionIndex);
 
 
       //log that the transaction was created to a specific address
       //YOUR CODE HERE
+      TransactionCreated(msg.sender, destination, value, _transactionIndex);
     }
 
     //returns pending transcations
     function getPendingTransactions() constant validOwner public returns (uint[]) {
       //YOUR CODE HERE
+      return _pendingTransactions;
     }
 
     /// @dev Allows an owner to confirm a transaction.
@@ -111,33 +117,45 @@ contract MultiSigWallet {
 
       //Create variable transaction using storage (which creates a reference point)
       //YOUR CODE HERE
+      Transaction storage transaction = _transactions[transactionId];
 
       // Transaction must exist, note: use require(), but can't do require(transaction), .
       //YOUR CODE HERE
+      require(transaction.source != address(0));
 
       // Creator cannot sign the transaction, use require()
       //YOUR CODE HERE
+      require(msg.sender != transaction.source);
 
       // Cannot sign a transaction more than once, use require()
       //YOUR CODE HERE
+      require(transaction.signatures[msg.sender] == 0);
 
       // assign the transaction = 1, so that when the function is called again it will fail
       //YOUR CODE HERE
+      transaction.signatures[msg.sender] = 1;
+
 
       // increment signatureCount
       //YOUR CODE HERE
+      transaction.signatureCount++;
+
 
       // log transaction
       //YOUR CODE HERE
+      TransactionSigned(msg.sender, transactionId);
+
 
       //  check to see if transaction has enough signatures so that it can actually be completed
       // if true, make the transaction. Don't forget to log the transaction was completed.
       if (transaction.signatureCount >= MIN_SIGNATURES) {
         require(address(this).balance >= transaction.value); //validate transaction
         //YOUR CODE HERE
+        transaction.destination.transfer(transaction.value);
 
         //log that the transaction was complete
         //YOUR CODE HERE
+        TransactionCompleted(transaction.source, transaction.destination, transaction.value, transactionId);
 
         //end with a call to deleteTransaction
         deleteTransaction(transactionId);
@@ -162,6 +180,7 @@ contract MultiSigWallet {
     /// @return Returns balance
     function walletBalance() constant public returns (uint) {
       //YOUR CODE HERE
+      return address(this).balance;
     }
 
  }
