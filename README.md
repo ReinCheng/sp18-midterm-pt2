@@ -1,3 +1,27 @@
+###### Project Partner 1
+
+Name: Qingen Zhang
+
+SID: 26363223
+
+Email: qingen_zhang@berkeley.edu
+
+###### Project Partner 2
+
+Name: Renjun Cheng
+
+SID: 26327618
+
+Email: cheng960816@berkeley.edu
+
+###### Project Partner 3 (if any)
+
+Name:
+
+SID:
+
+Email:
+
 # Midterm Part 2, Frontend  Code
 
 We've already setup the infastructure for you. You just need to implement a couple of methods that will be used to 1) log events that we will generate by interacting with the truffle console, and 2) send ether to our multi-sig wallet contract using our local web3. 
